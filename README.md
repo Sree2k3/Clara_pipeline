@@ -9,5 +9,7 @@
 3. **Execute the batch script** (`./run_all.sh`).  
 4. **Check `outputs/`** – you’ll see a `v1` and `v2` folder for each account, plus a `changes.md`.  
 
-More details below → **Setup → Usage → Architecture** (fill in later).
+## 📹 Demo video
+<https://drive.google.com/file/d/1yZzUAkVcYEnDiJEALGgv2YkAmX_N7jeS/view?usp=sharing>
+
 
