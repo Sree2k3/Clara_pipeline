@@ -20,7 +20,6 @@ docker-compose.override.yml
 
 # Secrets
 .env
-*.json
 
 # n8n data (you can keep workflow JSON in /workflows)
 .n8n/

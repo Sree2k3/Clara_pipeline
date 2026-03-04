@@ -1,0 +1,72 @@
+{
+    "nodes": [
+        {
+            "parameters": {
+                "path": "webhook-onboard",
+                "httpMethod": "POST"
+            },
+            "id": "WebhookOnboard",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                240,
+                320
+            ]
+        },
+        {
+            "parameters": {
+                "command": "python3",
+                "functionCode": "import subprocess, os, json, sys\npayload = $json\naccount_id = payload[\"account_id\"]\nonboard_path = payload[\"onboard_path\"]\n\nv1_memo_path = f\"outputs/accounts/{account_id}/v1/memo.json\"\nif not os.path.exists(v1_memo_path):\n    raise Exception(f\"v1 memo not found for {account_id}\")\n\n# Run compare_and_update.py\nsubprocess.run([\n    \"scripts/compare_and_update.py\",\n    account_id,\n    v1_memo_path,\n    onboard_path,\n    f\"outputs/accounts/{account_id}\"\n], check=True)\n\nreturn {\"json\": {\"status\": \"v2 generated\", \"account_id\": account_id}}\n"
+            },
+            "name": "Run Onboard Update",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                560,
+                320
+            ],
+            "id": "RunOnboardUpdate"
+        },
+        {
+            "parameters": {},
+            "name": "Asana Update Task (optional)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                860,
+                320
+            ],
+            "id": "AsanaUpdate",
+            "credentials": {
+                "httpBasicAuth": "AsanaAPI"
+            }
+        }
+    ],
+    "connections": {
+        "WebhookOnboard": {
+            "main": [
+                [
+                    {
+                        "node": "RunOnboardUpdate",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "RunOnboardUpdate": {
+            "main": [
+                [
+                    {
+                        "node": "AsanaUpdate",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": true,
+    "settings": {},
+    "id": "2"
+}

@@ -1,0 +1,74 @@
+{
+    "nodes": [
+        {
+            "parameters": {
+                "path": "webhook-demo",
+                "httpMethod": "POST"
+            },
+            "id": "WebhookDemo",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                240,
+                120
+            ]
+        },
+        {
+            "parameters": {
+                "command": "python3",
+                "functionCode": "import sys, subprocess, os, json\n\n# Expected payload:\n# { \"account_id\": \"demo_001\", \"transcript_path\": \"data/demo/demo_001.txt\" }\npayload = $json\naccount_id = payload[\"account_id\"]\ntranscript_path = payload[\"transcript_path\"]\n\n# Run extraction script\nresult = subprocess.run([\"scripts/extract_memo.py\", transcript_path, account_id], capture_output=True, text=True)\nif result.returncode != 0:\n    raise Exception(f\"Extraction failed: {result.stderr}\")\nmemo_json = result.stdout\n\n# Save memo JSON to output folder\nout_path = f\"outputs/accounts/{account_id}/v1/memo.json\"\nos.makedirs(os.path.dirname(out_path), exist_ok=True)\nwith open(out_path, \"w\") as f:\n    f.write(memo_json)\n\n# Render agent spec (v1)\nsubprocess.run([\"scripts/render_agent_spec.py\", out_path, \"v1\", f\"outputs/accounts/{account_id}/v1/agent_spec.yaml\"], check=True)\n\n# (Optional) create Asana task – use a tiny HTTP request node later\n\nreturn {\n  \"json\": {\n    \"status\": \"ok\",\n    \"account_id\": account_id,\n    \"memo_path\": out_path,\n    \"spec_path\": f\"outputs/accounts/{account_id}/v1/agent_spec.yaml\"\n  }\n}\n"
+            },
+            "name": "Run Demo Extraction",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                560,
+                120
+            ],
+            "id": "RunDemoExtraction"
+        },
+        {
+            "parameters": {},
+            "name": "Asana Task (optional)",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                860,
+                120
+            ],
+            "id": "CreateAsanaTask",
+            "credentials": {
+                "httpBasicAuth": "AsanaAPI"
+            },
+            "executeOnce": true,
+            "notes": "If you want a task per account, fill in your Asana PAT and workspace/project IDs."
+        }
+    ],
+    "connections": {
+        "WebhookDemo": {
+            "main": [
+                [
+                    {
+                        "node": "Run Demo Extraction",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Run Demo Extraction": {
+            "main": [
+                [
+                    {
+                        "node": "Create AsanaTask",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "active": true,
+    "settings": {},
+    "id": "1"
+}
