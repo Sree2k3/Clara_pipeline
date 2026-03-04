@@ -1,0 +1,18 @@
+# Core
+pydantic==2.*      # data validation
+jinja2==3.*        # templating
+
+# Optional – transcription (if you need to convert audio)
+openai-whisper  # free, runs locally (CPU)
+
+# Diff generation (v1 → v2)
+deepdiff==6.* 
+
+# If you decide to store data in Google Sheets (free, works in India)
+gspread==5.* 
+oauth2client==4.*   # for service‑account auth
+
+# HTTP client (for Asana)
+requests==2.* 
+
+Flask==2.3.3 

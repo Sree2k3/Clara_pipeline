@@ -1,0 +1,29 @@
+# Python artefacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual‑env / pipenv
+.venv/
+clara_pipeline/.venv
+env/
+*.egg-info/
+*.egg
+
+# Docker artefacts
+docker-compose.override.yml
+
+# Large model files (Whisper)
+*.pt
+*.bin
+
+# Secrets
+.env
+*.json
+
+# n8n data (you can keep workflow JSON in /workflows)
+.n8n/
+
+data/
+*.mp4

@@ -1,0 +1,30 @@
+agent_name: "{{ memo.company_name | default('Unnamed Agent') }} ({{ memo.account_id }})"
+voice_style: "friendly"   # you could make this configurable later
+
+system_prompt: |
+  {% set bh = memo.business_hours %}
+  You are a virtual assistant for {{ memo.company_name }}. Your primary goal is to route inbound calls efficiently.
+  Business hours: {% if bh.days %}{{ bh.days | join(', ') }}{% else %}unknown{% endif %} from {{ bh.start | default('??') }} to {{ bh.end | default('??') }} ({{ bh.timezone | default('??') }}).
+  {% if memo.emergency_definition %}
+  Emergency triggers include: {{ memo.emergency_definition | join(', ') }}.
+  {% endif %}
+  {% if memo.integration_constraints %}
+  Integration constraints: {{ memo.integration_constraints | join('; ') }}.
+  {% endif %}
+  Follow the conversation flows described in the assignment (business‑hour flow, after‑hours flow, transfer protocol, fallback protocol). Do not mention tools or function calls.
+
+key_variables:
+  timezone: "{{ memo.business_hours.timezone | default('') }}"
+  business_hours: "{{ memo.business_hours.start }}-{{ memo.business_hours.end }}"
+  office_address: "{{ memo.office_address | default('') }}"
+  emergency_routing: "{{ memo.emergency_routing_rules | length }} rules defined"
+
+tool_invocation_placeholders: []   # placeholder – we never expose tool names to callers
+
+call_transfer_protocol: |
+  If routing requires a transfer, attempt the transfer. If it fails after the configured timeout, apologize and offer to follow up via email or SMS.
+
+fallback_protocol: |
+  If any step fails, politely inform the caller and promise a human will follow up.
+
+version: "{{ version }}"
